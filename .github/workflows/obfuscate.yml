@@ -8,6 +8,9 @@ on:
     paths:
       - '明文源吗'
 
+permissions:
+  contents: write
+
 jobs:
   build-and-obfuscate:
     runs-on: ubuntu-latest
@@ -88,13 +91,18 @@ jobs:
           EOF
           node obfuscate.js
 
-      - name: Commit and push the obfuscated file
+      - name: Sync _worker.js for Cloudflare Pages
+        run: |
+          cp "明文源吗" "_worker.js"
+          echo "已同步 '明文源吗' -> '_worker.js'(Pages 高级模式入口)"
+
+      - name: Commit and push the generated files
         run: |
           git config --global user.name 'GitHub Actions Bot'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add '少年你相信光吗'
+          git add '少年你相信光吗' '_worker.js'
           if git diff --staged --quiet; then
-            echo "No changes to commit, the obfuscated file is already up-to-date."
+            echo "No changes to commit, generated files are already up-to-date."
           else
             git commit -m "部署用这个"
             git push
